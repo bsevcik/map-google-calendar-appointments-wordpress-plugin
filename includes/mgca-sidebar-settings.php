@@ -82,7 +82,6 @@ function mgca_field_gcal_api_key_cb( $args ) {
     $option = get_option( 'mgca_options_gcal_api_key' );
     // output the field
     ?>
-
     <input 
         id="<?php echo esc_attr( $args['label_for'] ); ?>"
         type="text"
