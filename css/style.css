@@ -1,0 +1,43 @@
+input {
+  margin: 5px auto;
+}
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+#googleMapSection {
+  margin: 10px;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0);
+}
+#eventMapLinks {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  min-width: 260px;
+}
+.eventInfoAndMap {
+  flex-basis: 45%;
+}
+.mapouter {
+  margin: 10px auto;
+  text-align: center;
+}
+.eventInfoAndMap {
+  margin: 20px 10px;
+  height: 375px;
+  width: 460px;
+}
+.mapouter {
+  position: relative;
+  height: 250px;
+  width: 250px;
+}
+.gmap_canvas {
+  overflow: hidden;
+  background: none !important;
+  height: 250px;
+  width: 250px;
+}
