@@ -9,33 +9,32 @@
 
 if (!defined('ABSPATH')){
     echo 'you have reached this page in error';
-    $baseURL = "https://www.googleapis.com/calendar/v3/calendars/";
-    $option = get_option( 'admin_email' );
-    echo ($option);
-    $gmailAccount = get_option( 'mgca_options_gmail_account' );
-    $baseURL2 = "/events?";
-    $gcalAPIKey = get_option( 'mgca_options_gcal_api_key' );
-    $baseURL3 = "&maxResults=9999";
-    $url = $baseURL . $gmailAccount . $baseURL2 . $gcalAPIKey . $baseURL3;
-    echo $url;
-    exit;
+    // exit; // Exit file if accessed directly
 }
 
-// https://www.googleapis.com/calendar/v3/calendars/bensevcik%40gmail.com/events?key=AIzaSyAJV0pH9dpVwdNZeLajIGsIpjcPu3tVgAE&maxResults=2
+// BUILD THE GOOGLE CALENDAR API URL
+$parse_uri = explode( 'wp-content', $_SERVER['SCRIPT_FILENAME'] );
+require_once( $parse_uri[0] . 'wp-load.php' );
+$baseURL = "https://www.googleapis.com/calendar/v3/calendars/";
+$gmailAccount = get_option( 'mgca_options_gmail_account' );
+$baseURL2 = "/events?";
+$gcalAPIKey = "key=".get_option( 'mgca_options_gcal_api_key' );
+$baseURL3 = "&maxResults=9999";
+$url = $baseURL . $gmailAccount . $baseURL2 . $gcalAPIKey . $baseURL3;
+// echo $url;
 
-$handle = curl_init();
- 
+// https://www.googleapis.com/calendar/v3/calendars/bensevcik%40gmail.com/events?key=AIzaSyAJV0pH9dpVwdNZeLajIGsIpjcPu3tVgAE&maxResults=2
 // $url = "http://data.ncaa.com/casablanca/scoreboard/football/fbs/2019/01/scoreboard.json";
-// gosh darn google requires tls the whole way, so it's hard to develop on localhost :(
-// Set the url
+
+
+// RUN CURL AND ECHO RESULT
+// google requires tls the whole way, so it's hard to develop on localhost :(
+$handle = curl_init();
 curl_setopt($handle, CURLOPT_URL, $url);
 // Set the result output to be a string.
 curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
- 
 $output = curl_exec($handle);
- 
 curl_close($handle);
- 
 echo $output;
 
 
