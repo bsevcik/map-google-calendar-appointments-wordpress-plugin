@@ -57,7 +57,11 @@ function setDates(datePicked) {
 function setUpcomingArray() {
   "use strict";
   for (
-    var i = 0, atLeastFour = 0, atMostSix = 9999, todayJSDate = new Date(today);
+    var i = 0,
+      atLeastFour = 0,
+      atMostSix = 9999,
+      todayJSDate = new Date(today),
+      firstSuccess = true;
     i < allCalArr.items.length;
     i++
   ) {
@@ -71,21 +75,24 @@ function setUpcomingArray() {
     } catch (e) {}
     try {
       if (
-        Object.values(allCalArr.items[i].start)[0].slice(0, 10) === today ||
-        Object.values(allCalArr.items[i].end)[0].slice(0, 10) === today ||
-        (Object.values(allCalArr.items[i].start)[0].slice(0, 10) ===
-          yesterday &&
-          Object.values(allCalArr.items[i].end)[0].slice(0, 10) === tomorrow) ||
-        (todayJSDate === true &&
-          i < atLeastFour &&
-          allCalArr.items[i].status !== "cancelled" &&
-          i < atMostSix)
+        (Object.values(allCalArr.items[i].start)[0].slice(0, 10) === today ||
+          Object.values(allCalArr.items[i].end)[0].slice(0, 10) === today ||
+          (Object.values(allCalArr.items[i].start)[0].slice(0, 10) ===
+            yesterday &&
+            Object.values(allCalArr.items[i].end)[0].slice(0, 10) ===
+              tomorrow) ||
+          i < atLeastFour ||
+          todayJSDate === true) &&
+        allCalArr.items[i].status !== "cancelled" &&
+        i < atMostSix
       ) {
         // wherever i finds a date match, atLeastFour is set on an OR statement to ensure it'll grab the next 4 events, even if they aren't today
-        if (atLeastFour === 0) {
+
+        if (firstSuccess === true) {
           atLeastFour = Number(i + 4);
           atMostSix = Number(i + 6);
         }
+        firstSuccess = false;
         todayCalArr.push([
           allCalArr.items[i].summary,
           allCalArr.items[i].location,

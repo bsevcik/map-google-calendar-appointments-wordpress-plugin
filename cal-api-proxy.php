@@ -19,7 +19,7 @@ $baseURL = "https://www.googleapis.com/calendar/v3/calendars/";
 $gmailAccount = get_option( 'mgca_options_gmail_account' );
 $baseURL2 = "/events?";
 $gcalAPIKey = "key=".get_option( 'mgca_options_gcal_api_key' );
-$baseURL3 = "&maxResults=9999";
+$baseURL3 = "&maxResults=9999&orderBy=startTime&singleEvents=true";
 $url = $baseURL . $gmailAccount . $baseURL2 . $gcalAPIKey . $baseURL3;
 // echo $url;
 
