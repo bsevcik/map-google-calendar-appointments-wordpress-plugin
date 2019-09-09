@@ -1,4 +1,3 @@
-/*eslint-env browser*/
 var todayCalArr = [],
   today,
   yesterday,
@@ -35,7 +34,7 @@ function setDates(datePicked) {
   "use strict";
   if (datePicked) {
     today = new Date(datePicked);
-    console.log("date was picked successfully");
+    // console.log("date was picked successfully");
   } else {
     today = new Date();
   }
@@ -43,13 +42,13 @@ function setDates(datePicked) {
   yesterday.setDate(today.getDate() - 1);
   tomorrow = new Date(today);
   tomorrow.setDate(today.getDate() + 1);
-  console.log(yesterday + "\n" + today + "\n" + tomorrow);
+  // console.log(yesterday + "\n" + today + "\n" + tomorrow);
 
   //Convert yesterday, today, and tomorrow in yy-mm-dd format through convertDateFormat() helper function
   yesterday = convertDateFormat(yesterday);
   today = convertDateFormat(today);
   tomorrow = convertDateFormat(tomorrow);
-  console.log(yesterday + "\n" + today + "\n" + tomorrow);
+  // console.log(yesterday + "\n" + today + "\n" + tomorrow);
 
   getCalDataLocal();
 }
@@ -57,17 +56,28 @@ function setDates(datePicked) {
 // loop through and pull todays events, but get at least 4 upcoming events even if they're in the future
 function setUpcomingArray() {
   "use strict";
-  for (var i = 0, atLeastFour = 0; i < allCalArr.items.length; i++) {
+  var todayJSDate = new Date(today);
+  for (
+    var i = 0, atLeastFour = 0, atMostSix = 9999;
+    i < allCalArr.items.length;
+    i++
+  ) {
     if (
-      (allCalArr.items[i].start.dateTime.slice(0, 10) === today ||
-        allCalArr.items[i].end.dateTime.slice(0, 10) === today ||
-        (allCalArr.items[i].start.dateTime.slice(0, 10) === yesterday &&
-          allCalArr.items[i].end.dateTime.slice(0, 10) === tomorrow) ||
-        i < atLeastFour) &&
-      allCalArr.items[i].status !== "cancelled"
+      (Object.values(allCalArr.items[i].start)[0].slice(0, 10) === today ||
+        Object.values(allCalArr.items[i].end)[0].slice(0, 10) === today ||
+        (Object.values(allCalArr.items[i].start)[0].slice(0, 10) ===
+          yesterday &&
+          Object.values(allCalArr.items[i].end)[0].slice(0, 10) === tomorrow) ||
+        i < atLeastFour ||
+        todayJSDate <
+          new Date(Object.values(allCalArr.items[i].start)[0].slice(0, 10))) &&
+      allCalArr.items[i].status !== "cancelled" &&
+      i < atMostSix
     ) {
+      // wherever i finds a date match, atLeastFour is set on an OR statement to ensure it'll grab the next 4 events, even if they aren't today
       if (atLeastFour === 0) {
         atLeastFour = Number(i + 4);
+        atMostSix = Number(i + 6);
       }
       todayCalArr.push([
         allCalArr.items[i].summary,
@@ -85,6 +95,14 @@ function setUpcomingArray() {
       ]);
     }
   }
+  if (todayCalArr.length === 0) {
+    document.getElementById(
+      "eventMapLinks"
+    ).innerHTML = `<h2>You don't seem to have any Calendar Events scheduled after ${new Date(
+      today
+    ).toLocaleDateString()}</h2>`;
+    return;
+  }
   set12Hour();
 }
 
@@ -93,7 +111,7 @@ function getCalDataLocal() {
   "use strict";
   if (localStorage.storedallCalArr && updatedThisSession) {
     allCalArr = JSON.parse(localStorage.storedallCalArr);
-    console.log("Got Calendar Data from localStorage");
+    // console.log("Got Calendar Data from localStorage");
     setUpcomingArray();
   } else {
     getCalDataApi();
@@ -101,7 +119,7 @@ function getCalDataLocal() {
 }
 
 function getCalDataApi() {
-  console.log("Getting Calendar Data from Google Calendar API");
+  // console.log("Getting Calendar Data from Google Calendar API");
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
@@ -115,20 +133,9 @@ function getCalDataApi() {
       setUpcomingArray();
     }
   };
-  // could add ability to use any google calendar link
-  // var calLink = window.prompt("Type your calendar link");
-  // xhttp.open("GET", calLink, true);
-  var calApiBaseUrl0 =
-    "https://www.googleapis.com/calendar/v3/calendars/macnnoodles.com_7fdgja52s47hprhro2il2sh7vg%40group.calendar.google.com/events?orderBy=startTime&cache=true&key=AIzaSyC-KzxSLmmZitsCVv2DeueeUxoVwP0raVk&timeMin=" +
-    today +
-    "T00%3A00%3A00%2B00%3A00&timeMax=" +
-    2019 -
-    12 -
-    31 +
-    "T00%3A00%3A00%2B00%3A00&timeZone=America%2FDenver&singleEvents=true&maxResults=9999&false=America%2FDenver";
   xhttp.open(
     "GET",
-    "https://www.googleapis.com/calendar/v3/calendars/macnnoodles.com_7fdgja52s47hprhro2il2sh7vg%40group.calendar.google.com/events?orderBy=startTime&cache=true&key=AIzaSyC-KzxSLmmZitsCVv2DeueeUxoVwP0raVk&timeMin=2019-06-03T00%3A00%3A00%2B00%3A00&timeMax=2019-12-31T00%3A00%3A00%2B00%3A00&timeZone=America%2FDenver&singleEvents=true&maxResults=9999&false=America%2FDenver",
+    "/wp-content/plugins/map-google-calendar-appointments/cal-api-proxy.php",
     true
   );
   xhttp.send();
@@ -160,7 +167,7 @@ function set12Hour() {
 }
 
 function getMapLinks() {
-  console.log("Setting Map Links");
+  // console.log("Setting Map Links");
   var baseUrl = "https://maps.google.com/maps?q=";
   for (var i = 0; i < todayCalArr.length; i++) {
     todayCalArr[i].push(baseUrl + encodeURI(todayCalArr[i][1]));
@@ -182,35 +189,58 @@ function getDayFromDate(date) {
   return days[placeholder.getDay()];
 }
 
+function setCalMinHeights() {
+  var minHeightP = 0,
+    minHeightH2 = 0;
+  for (
+    var i = 0;
+    i < document.querySelectorAll("#eventMapLinks p").length;
+    i++
+  ) {
+    if (
+      document.querySelectorAll("#eventMapLinks p")[i].offsetHeight > minHeightP
+    ) {
+      minHeightP = document.querySelectorAll("#eventMapLinks p")[i]
+        .offsetHeight;
+    }
+    if (
+      document.querySelectorAll("#eventMapLinks h2")[i].offsetHeight >
+      minHeightH2
+    ) {
+      minHeightH2 = document.querySelectorAll("#eventMapLinks h2")[i]
+        .offsetHeight;
+    }
+  }
+  for (
+    var j = 0;
+    j < document.querySelectorAll("#eventMapLinks p").length;
+    j++
+  ) {
+    document.querySelectorAll("#eventMapLinks p")[j].style.minHeight =
+      minHeightP.toString() + "px";
+    document.querySelectorAll("#eventMapLinks h2")[j].style.minHeight =
+      minHeightH2.toString() + "px";
+  }
+  return "P minheights: " + minHeightP + " h2 minheight: " + minHeightH2;
+}
+
 function writeEvents() {
-  console.log("Writing Map Links to visible page");
+  // console.log("Writing Map Links to visible page");
   // writeAll div contains all the HTML I want to write onto the screen
   writeAll = "";
   document.getElementById("eventMapLinks").innerHTML = "";
   var placeholder;
-
-  // for (var i = 0; i < todayCalArr.length; i++) {
-  //     var placeholder = "<div class=\"eventInfoAndMap\"><h2>" + todayCalArr[i][2].slice(11, 16) + " - " + todayCalArr[i][3].slice(11, 16) + "</h2>" +
-  //     "<p>" + todayCalArr[i][0] + "<br>" +
-  //     (todayCalArr[i][1].slice(0, -5)) + "<br>" +
-  //     // "<a href=\"" + todayCalArr[i][4] + "\">" + "Open In Google Maps</a></p>" +
-  //     "<div class=\"mapouter\"> " +
-  //     "<div class=\"gmap_cavas\"> " +
-  //     "<iframe width=\"250\" height=\"250\" id=\"gmap_canvas\" src=\"" + todayCalArr[i][4] +  "&t=&z=9&ie=UTF8&iwloc=&output=embed\" frameborder=\"0\" scrolling=\"no\" marginheight=\"0\" marginwidth=\"0\">" +
-  //     "</iframe>" + "</div></div></div>";
-  //     writeAll += placeholder;
-  // }
-
   for (var i = 0; i < todayCalArr.length; i++) {
     var placeholder =
       '<div class="eventInfoAndMap"><h2>' +
       // add day of week that event starts
       getDayFromDate(todayCalArr[i][2][1]) +
       todayCalArr[i][2][2] +
-      " - " +
+      " - <br>" +
       // add day of end
       getDayFromDate(todayCalArr[i][3][1]) +
       todayCalArr[i][3][2] +
+      "&nbsp;&nbsp;&nbsp;" +
       "</h2>" +
       // description or title
       "<p>" +
@@ -225,36 +255,23 @@ function writeEvents() {
         // "<a href=\"" + todayCalArr[i][4] + "\">" + "Open In Google Maps</a></p>" +
         '<div class="mapouter"> ' +
         '<div class="gmap_cavas"> ' +
-        '<iframe width="250" height="250" id="gmap_canvas" src="' +
-        todayCalArr[i][4] +
+        '<iframe title="Map Of Upcoming Calendar Event" width="250" height="250" class="gmap_canvas_iframe" src="' +
+        // finally figured out that '#' is what kept breaking the iframe request! They all work now!
+        todayCalArr[i][4].replace(/#/gi, "") +
         '&t=&z=9&ie=UTF8&iwloc=&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0">' +
         "</iframe>" +
-        "</div></div></div>";
+        "</div>" +
+        "</div>" +
+        "</div>";
     } catch {
-      placeholder += "<p>Address Not Found</p></div>";
+      placeholder += "<h4>Address Not Found</h4></div>";
     }
     // add to HTML div
     writeAll += placeholder;
   }
   document.getElementById("eventMapLinks").innerHTML = writeAll;
-  // <h2>11:00 - 1:30<br></h2>
-  //     <p>
-  //         <h3>Lockheed Martin Lunch</h3>
-  //         Lockheed Martin Space, <br>
-  //         12257 S Wadsworth Blvd, <br>
-  //         Littleton, CO 80127, USA <br>
-  //         <a href="https://maps.google.com/maps?q=Lockheed%20Martin%20Space,%2012257%20S%20Wadsworth%20Blvd,%20Littleton,%20CO%2080127,%20USA">Open In Google Maps</a>
-  //       </p>
-  //   </div>
-  //   <div class="mapouter">
-  //       <div class="gmap_canvas">
-  //           <iframe width="250" height="250" id="gmap_canvas" src="https://maps.google.com/maps?q=Lockheed%20Martin%20Space%2C%20%2012257%20S%20Wadsworth%20Blvd%2C%20%20Littleton%2C%20CO%2080127%2C%20USA&t=&z=9&ie=UTF8&iwloc=&output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0">
-  //           </iframe>
-  //       </div>
+  setCalMinHeights();
 }
-
-// src="https://maps.google.com/maps?q=
-// university%20of%20san%20francisco&t=&z=13&ie=UTF8&iwloc=&output=embed"
 
 function convertDateFormatToSlash(date) {
   "use strict";
@@ -268,7 +285,7 @@ function convertDateFormatToSlash(date) {
 function dateSubmitted() {
   window.datePicked = document.getElementById("datePicker");
   dateToPass = convertDateFormatToSlash(datePicked.value);
-  console.log(datePicked.value);
+  // console.log(datePicked.value);
   todayCalArr = [];
   setDates(dateToPass);
 }
@@ -276,6 +293,7 @@ function dateSubmitted() {
 function inputSetToday() {
   document.getElementById("datePicker").value = convertDateFormat(new Date());
 }
+
 window.addEventListener("load", function() {
   setDates();
   inputSetToday();
@@ -285,24 +303,3 @@ window.addEventListener("load", function() {
     }
   });
 });
-
-// var x = allCalArr.items[0].start.dateTime;
-// var y = new Date(x).toLocaleString("en-US", {timeZone: "America/Denver"});
-// var data = $.get('https://www.googleapis.com/calendar/v3/calendars/macnnoodles.com_7fdgja52s47hprhro2il2sh7vg%40group.calendar.google.com/events?callback=jQuery21400583278904774025_1554850837976&orderBy=startTime&cache=true&key=AIzaSyC-KzxSLmmZitsCVv2DeueeUxoVwP0raVk&timeMin=2019-03-30T00%3A00%3A00%2B00%3A00&timeMax=2019-05-13T00%3A00%3A00%2B00%3A00&timeZone=America%2FDenver&singleEvents=true&maxResults=9999&false=America%2FDenver');
-
-// google calendar api-key: AIzaSyC-KzxSLmmZitsCVv2DeueeUxoVwP0raVk
-// account details: "macnnoodles.com_7fdgja52s47hprhro2il2sh7vg@group.calendar.google.com"
-// https://www.googleapis.com/calendar/v3/calendars/macnnoodles.com_7fdgja52s47hprhro2il2sh7vg%40group.calendar.google.com/events?cache=true&key=AIzaSyC-KzxSLmmZitsCVv2DeueeUxoVwP0raVk&maxResults=9999
-// https://www.googleapis.com/calendar/v3/calendars/macnnoodles.com_7fdgja52s47hprhro2il2sh7vg%40group.calendar.google.com/events?callback=jQuery21400583278904774025_1554850837976&orderBy=startTime&cache=true&key=AIzaSyC-KzxSLmmZitsCVv2DeueeUxoVwP0raVk&timeMin=2019-03-30T00%3A00%3A00%2B00%3A00&timeMax=2019-05-13T00%3A00%3A00%2B00%3A00&timeZone=America%2FDenver&singleEvents=true&maxResults=9999&false=America%2FDenver
-// appID: "129acb44-2c8a-8314-fbc8-73d5b973a88f"
-// a sample shows April 10 2019 at 8:00 pm, which is offset from UTC by -6:00 for Mountain Daylight savings time. MST is -07:00 "dateTime": "2019-04-10T20:00:00-06:00"
-
-//It appears that google wants me to use an api key, but it would be free anyways. If they cut me off then oh well...
-//https://developers.google.com/maps/documentation/embed/usage-and-billing
-/* <iframe
-  width="600"
-  height="450"
-  frameborder="0" style="border:0"
-  src="https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY
-    &q=Space+Needle,Seattle+WA" allowfullscreen>
-</iframe> */

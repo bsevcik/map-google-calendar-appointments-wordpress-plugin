@@ -1,11 +1,19 @@
 input {
   margin: 5px auto;
 }
-h2,
-h3,
-h4,
-p {
+.eventInfoAndMap h2,
+.eventInfoAndMap h3,
+.eventInfoAndMap h4,
+.eventInfoAndMap p {
   margin: 0;
+  line-height: 1.2em;
+}
+.eventInfoAndMap p {
+  min-height: 6em;
+}
+.eventInfoAndMap h2 {
+  font-size: 1.25em;
+  min-height: 3.6em;
 }
 #googleMapSection {
   margin: 10px;
@@ -27,7 +35,7 @@ p {
 }
 .eventInfoAndMap {
   margin: 20px 10px;
-  height: 375px;
+  min-height: 375px;
   width: 460px;
 }
 .mapouter {
@@ -40,4 +48,14 @@ p {
   background: none !important;
   height: 250px;
   width: 250px;
+}
+/* For mobile, or any time the maps drop down to one column, it doesn't need to space evenly */
+@media (max-width: 600px) {
+  .eventInfoAndMap p {
+    min-height: auto;
+  }
+  .eventInfoAndMap h2 {
+    font-size: 1.25em;
+    min-height: auto;
+  }
 }
