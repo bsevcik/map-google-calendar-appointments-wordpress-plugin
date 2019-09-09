@@ -56,43 +56,54 @@ function setDates(datePicked) {
 // loop through and pull todays events, but get at least 4 upcoming events even if they're in the future
 function setUpcomingArray() {
   "use strict";
-  var todayJSDate = new Date(today);
   for (
-    var i = 0, atLeastFour = 0, atMostSix = 9999;
+    var i = 0, atLeastFour = 0, atMostSix = 9999, todayJSDate = new Date(today);
     i < allCalArr.items.length;
     i++
   ) {
-    if (
-      (Object.values(allCalArr.items[i].start)[0].slice(0, 10) === today ||
+    // if today is after i, then start dumping the next 4 events
+    try {
+      if (
+        todayJSDate >
+        new Date(Object.values(allCalArr.items[i].start)[0].slice(0, 10))
+      ) {
+      }
+    } catch (e) {}
+    try {
+      if (
+        Object.values(allCalArr.items[i].start)[0].slice(0, 10) === today ||
         Object.values(allCalArr.items[i].end)[0].slice(0, 10) === today ||
         (Object.values(allCalArr.items[i].start)[0].slice(0, 10) ===
           yesterday &&
           Object.values(allCalArr.items[i].end)[0].slice(0, 10) === tomorrow) ||
-        i < atLeastFour ||
-        todayJSDate <
-          new Date(Object.values(allCalArr.items[i].start)[0].slice(0, 10))) &&
-      allCalArr.items[i].status !== "cancelled" &&
-      i < atMostSix
-    ) {
-      // wherever i finds a date match, atLeastFour is set on an OR statement to ensure it'll grab the next 4 events, even if they aren't today
-      if (atLeastFour === 0) {
-        atLeastFour = Number(i + 4);
-        atMostSix = Number(i + 6);
+        (todayJSDate === true &&
+          i < atLeastFour &&
+          allCalArr.items[i].status !== "cancelled" &&
+          i < atMostSix)
+      ) {
+        // wherever i finds a date match, atLeastFour is set on an OR statement to ensure it'll grab the next 4 events, even if they aren't today
+        if (atLeastFour === 0) {
+          atLeastFour = Number(i + 4);
+          atMostSix = Number(i + 6);
+        }
+        todayCalArr.push([
+          allCalArr.items[i].summary,
+          allCalArr.items[i].location,
+          [
+            allCalArr.items[i].start.dateTime,
+            allCalArr.items[i].start.dateTime.slice(0, 10),
+            allCalArr.items[i].start.dateTime.slice(11, 16)
+          ],
+          [
+            allCalArr.items[i].start.dateTime,
+            allCalArr.items[i].end.dateTime.slice(0, 10),
+            allCalArr.items[i].end.dateTime.slice(11, 16)
+          ]
+        ]);
       }
-      todayCalArr.push([
-        allCalArr.items[i].summary,
-        allCalArr.items[i].location,
-        [
-          allCalArr.items[i].start.dateTime,
-          allCalArr.items[i].start.dateTime.slice(0, 10),
-          allCalArr.items[i].start.dateTime.slice(11, 16)
-        ],
-        [
-          allCalArr.items[i].start.dateTime,
-          allCalArr.items[i].end.dateTime.slice(0, 10),
-          allCalArr.items[i].end.dateTime.slice(11, 16)
-        ]
-      ]);
+    } catch (e) {
+      console.log(e);
+      allCalArr.items[i].start = { dateTime: "No Date Was Listed" };
     }
   }
   if (todayCalArr.length === 0) {
